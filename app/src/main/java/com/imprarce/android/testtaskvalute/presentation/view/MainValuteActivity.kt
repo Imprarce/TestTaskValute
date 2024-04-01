@@ -1,9 +1,11 @@
 package com.imprarce.android.testtaskvalute.presentation.view
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.imprarce.android.testtaskvalute.data.model.MoneyItem
 import com.imprarce.android.testtaskvalute.databinding.ActivityValuteMainBinding
@@ -12,25 +14,23 @@ import com.imprarce.android.testtaskvalute.presentation.viewmodel.MainValuteView
 import com.imprarce.android.testtaskvalute.utils.ApiResult
 import com.imprarce.android.testtaskvalute.utils.CustomProgressBar.hideProgressBar
 import com.imprarce.android.testtaskvalute.utils.CustomProgressBar.showProgressBar
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.util.*
+import dagger.hilt.android.AndroidEntryPoint
 
 private const val TAG = "MainValuteActivity"
 
+@AndroidEntryPoint
 class MainValuteActivity : AppCompatActivity() {
-    private lateinit var valuteViewModel : MainValuteViewModel
+    private val valuteViewModel by viewModels<MainValuteViewModel>()
     private lateinit var binding: ActivityValuteMainBinding
     private lateinit var adapter : MoneyAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        valuteViewModel = ViewModelProvider(this).get(MainValuteViewModel::class.java)
         binding = ActivityValuteMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        valuteViewModel.getElements()
         moneyDataObserver()
+
     }
 
     private fun moneyDataObserver(){
@@ -41,9 +41,9 @@ class MainValuteActivity : AppCompatActivity() {
                     Log.d(TAG, "Loading")
                 }
                 is ApiResult.Success -> {
-                    hideProgressBar()
                     setAdapter(response.data)
-                    binding.date.text = "${binding.date.text} ${response.date}"
+                    binding.date.text = "Обновлено: ${response.date}"
+                    hideProgressBar()
                     Log.d(TAG, "Success")
                 }
                 is ApiResult.Error -> {
@@ -60,4 +60,15 @@ class MainValuteActivity : AppCompatActivity() {
         binding.recyclerViewMoney.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewMoney.adapter = adapter
     }
+
+    override fun onPause() {
+        super.onPause()
+        valuteViewModel.stopRefreshing()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        valuteViewModel.startRefreshing()
+    }
+
 }
