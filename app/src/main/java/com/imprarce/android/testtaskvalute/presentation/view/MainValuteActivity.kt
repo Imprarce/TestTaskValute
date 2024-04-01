@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -49,6 +50,7 @@ class MainValuteActivity : AppCompatActivity() {
                 is ApiResult.Error -> {
                     hideProgressBar()
                     Log.e(TAG, "Error: ${response.message}")
+                    Toast.makeText(this, "Ошибка с интернет соединением: ${response.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -70,5 +72,6 @@ class MainValuteActivity : AppCompatActivity() {
         super.onResume()
         valuteViewModel.startRefreshing()
     }
+
 
 }

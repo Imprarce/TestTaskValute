@@ -52,6 +52,7 @@ class MainValuteViewModel @Inject constructor(
         }
     }
 
+
     override fun onCleared() {
         stopRefreshing()
         super.onCleared()

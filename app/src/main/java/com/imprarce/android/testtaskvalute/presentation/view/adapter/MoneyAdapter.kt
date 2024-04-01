@@ -43,6 +43,7 @@ class MoneyAdapter(private val moneyList: List<MoneyItem>) :
         return moneyList.size + 1
     }
 
+
     override fun getItemViewType(position: Int): Int {
         return if (position == 0) {
             VIEW_TYPE_HEADER

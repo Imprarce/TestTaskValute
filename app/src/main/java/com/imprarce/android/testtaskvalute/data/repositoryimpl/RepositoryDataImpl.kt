@@ -9,10 +9,5 @@ class RepositoryDataImpl( private var api : RetrofitApi) : RepositoryData {
     override suspend fun getMoney(): Call<MoneyResponse> {
         return api.fetchMoney()
 
-//        if (response.isSuccessful) {
-//            return response.body() ?: throw Exception("Response body is null")
-//        } else {
-//            throw Exception("Failed to fetch money: ${response.errorBody()?.string()}")
-//        }
     }
 }
