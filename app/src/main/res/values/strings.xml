@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">TestTaskValute</string>
     <string name="plug_text">Заглушка</string>
-    <string name="last_date_change">Последнее время изменения -</string>
+    <string name="last_date_change">Обновление: </string>
     <string name="char_code_header">Код</string>
     <string name="name_header">Название</string>
     <string name="nominal_header">Номинал</string>

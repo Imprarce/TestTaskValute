@@ -3,9 +3,10 @@ package com.imprarce.android.testtaskvalute.data.api
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.imprarce.android.testtaskvalute.data.api.response.DateResponse
 import com.imprarce.android.testtaskvalute.data.api.response.MoneyResponse
 import com.imprarce.android.testtaskvalute.data.model.MoneyItem
+import com.imprarce.android.testtaskvalute.utils.ApiResult
+import com.imprarce.android.testtaskvalute.utils.FormatDate
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -14,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 private const val TAG = "Fetch"
 
-class Fetch {
+abstract class Fetch {
     private val moneyApi : RetrofitApi
     private val dateApi : RetrofitApi
 
@@ -27,13 +28,16 @@ class Fetch {
         dateApi = retrofitMoney.create(RetrofitApi::class.java)
     }
 
-    fun fetchMoney() : LiveData<List<MoneyItem>> {
-        val responseLiveData: MutableLiveData<List<MoneyItem>> = MutableLiveData()
+    fun fetchMoney() : LiveData<ApiResult<List<MoneyItem>>> {
+        val responseLiveData: MutableLiveData<ApiResult<List<MoneyItem>>> = MutableLiveData()
+        responseLiveData.value = ApiResult.Loading
+
         val flickrRequest : Call<MoneyResponse> = moneyApi.fetchMoney()
 
         flickrRequest.enqueue(object : Callback<MoneyResponse> {
             override fun onFailure(call: Call<MoneyResponse>, t: Throwable) {
                 Log.e(TAG, "Failed to fetch money", t)
+                responseLiveData.value = ApiResult.Error("Failed to fetch money: ${t.message}")
             }
 
             override fun onResponse(call: Call<MoneyResponse>, response: Response<MoneyResponse>) {
@@ -42,30 +46,14 @@ class Fetch {
 
                 val moneyItemList: List<MoneyItem> = valuteMap?.values?.toList() ?: emptyList()
 
-                responseLiveData.value = moneyItemList
-                Log.d(TAG, "Response received money ${responseLiveData.value}")
-            }
-        })
-
-        return responseLiveData
-    }
-
-    fun fetchDate() : LiveData<String> {
-        val responseLiveData: MutableLiveData<String> = MutableLiveData()
-        val flickrRequest : Call<DateResponse> = dateApi.fetchDate()
-
-        flickrRequest.enqueue(object : Callback<DateResponse> {
-            override fun onFailure(call: Call<DateResponse>, t: Throwable) {
-                Log.e(TAG, "Failed to fetch date", t)
-            }
-
-            override fun onResponse(call: Call<DateResponse>, response: Response<DateResponse>) {
-                val dateResponse: DateResponse? = response.body()
-
-                val date: String= dateResponse?.date ?: ""
-
-                responseLiveData.value = date
-                Log.d(TAG, "Response received date ${responseLiveData.value}")
+                val date: String = if (moneyResponse != null && !moneyResponse.date.isNullOrEmpty()) {
+                    FormatDate.formatDate(moneyResponse.date)
+                } else {
+                    ""
+                }
+                val successResult = ApiResult.Success(data = moneyItemList, date = date)
+                responseLiveData.value = successResult
+                Log.d(TAG, "Response received money $responseLiveData")
             }
         })
 
